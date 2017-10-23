@@ -7,7 +7,7 @@ contract VotingToken {
 } 
 
 contract Vote {
-    mapping (uint => bytes32) public proposals;
+    mapping (uint => string) public proposals;
     mapping (uint => uint) votes;
 
     uint public proposalCount;
@@ -23,9 +23,8 @@ contract Vote {
         votingTime = setVotingTime;
     }
 
-    function addProposal(bytes32 proposal) public returns (bool successful) {
-        //require (owner == msg.sender);
-        
+    function addProposal(string proposal) public returns (bool successful) {
+        require (owner == msg.sender);
         proposals[proposalCount] = proposal;
         proposalCount += 1;
 
@@ -55,11 +54,11 @@ contract Vote {
         return (votes[id]);        
     }
     
-    function returnCurrentVote(uint id) constant public returns (bytes32, uint) {
+    function returnCurrentVote(uint id) constant public returns (string, uint) {
         return (proposals[id], votes[id]);        
     }
 
-    function getWinner() constant public returns (bytes32 winner) {
+    function getWinner() constant public returns (string winner) {
         require(isOver());
 
         uint id;
@@ -103,7 +102,7 @@ contract VotingSystem {
         return voteCount - 1;
     }
 
-    function addProposal(uint voteID, bytes32 proposal) public {
+    function addProposal(uint voteID, string proposal) public {
         votes[voteID].addProposal(proposal);
     }
 
@@ -116,18 +115,5 @@ contract VotingSystem {
         return results;
     }
     
-
-    // Requires frontend to convert from bytes32 to string
-    function returnCurrentVote(uint voteID) constant public returns (bytes32[], uint[]) {
-        var proposalCount = votes[voteID].getProposalCount();
-        var proposalResults = new bytes32[](proposalCount);
-        var voteResults = new uint[](proposalCount);
-        
-        for (uint i = 0; i < proposalCount; i++) {
-            (proposalResults[i],voteResults[i]) = votes[voteID].returnCurrentVote(i);
-        }
-
-        return (proposalResults, voteResults);
-    }
 
 }
