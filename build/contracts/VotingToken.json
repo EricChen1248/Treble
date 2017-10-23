@@ -1,0 +1,50 @@
+{
+  "contract_name": "VotingToken",
+  "abi": [],
+  "unlinked_binary": "0x60606040523415600e57600080fd5b5b603680601c6000396000f30060606040525b600080fd00a165627a7a7230582020dbde2d58d38fdf2e5745b686438e3c0ac1fe4f3f5ded81de31c959c48b20ea0029",
+  "networks": {
+    "1508570968799": {
+      "links": {},
+      "events": {},
+      "updated_at": 1508570982763
+    },
+    "1508571721882": {
+      "events": {},
+      "links": {},
+      "address": "0x3cd69f3750ed8e1970b2bcbdddb4453cf0b495c1",
+      "updated_at": 1508571727923
+    },
+    "1508571836031": {
+      "events": {},
+      "links": {},
+      "address": "0x000faaea5808ea85833e866a73247e506f2a1d3a",
+      "updated_at": 1508571865532
+    },
+    "1508572005791": {
+      "events": {},
+      "links": {},
+      "address": "0x0f87a254073badaeaf99f59cd44958f86236fa70",
+      "updated_at": 1508572018102
+    },
+    "1508572423182": {
+      "events": {},
+      "links": {},
+      "address": "0x2bc174259af625995afff69c1b18275874e2f076",
+      "updated_at": 1508572431366
+    },
+    "1508575724184": {
+      "events": {},
+      "links": {},
+      "address": "0x9058c6dd8bfb9885d39e6063c961e403879b9158",
+      "updated_at": 1508575735563
+    },
+    "1508728866831": {
+      "events": {},
+      "links": {},
+      "address": "0xbd0208d15e7d8e14581ae5159367a6ee11d82922",
+      "updated_at": 1508728911912
+    }
+  },
+  "schema_version": "0.0.5",
+  "updated_at": 1508728911912
+}
