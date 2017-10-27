@@ -2,13 +2,12 @@ pragma solidity ^ 0.4.8;
 
 // Voting system for TREBLE for estate management and issues.
 
-contract VotingToken {
-    mapping (address => uint) votingWeight;
-} 
 
 contract Vote {
-    mapping (uint => string) public proposals;
+    mapping (uint => bytes32) public proposals;
     mapping (uint => uint) votes;
+    mapping (address => uint) usableVotes;
+    
 
     uint public proposalCount;
     address owner;
@@ -16,14 +15,35 @@ contract Vote {
     uint startTime;
     uint votingTime;
 
-    VotingToken ballot;
-    function Vote(uint startingTime, uint setVotingTime) public {
+    function Vote(uint startingTime, uint setVotingTime, address[] voters, uint[] tokens) public {
         owner = msg.sender;
         startTime = startingTime;
         votingTime = setVotingTime;
+
+        for (uint i = 0; i < voters.length; i++) {
+            usableVotes[voters[i]] = tokens[i];
+        }
     }
 
-    function addProposal(string proposal) public returns (bool successful) {
+    function voteFor(address voter,uint proposalID, uint vote) public returns(bool successful) {
+        require(usableVotes[voter] > vote);
+        require(!isOver());
+        usableVotes[voter] -= vote;
+        votes[proposalID] += vote;
+
+        return true;
+    }
+
+    function transferVote(address sender, address receiver, uint vote) public returns (bool successful) {
+        require(!isOver());
+        require(usableVotes[sender] > vote);
+
+        usableVotes[sender] -= vote;
+        usableVotes[receiver] += vote;
+        return true;
+    }
+
+    function addProposal(bytes32 proposal) public returns (bool successful) {
         require (owner == msg.sender);
         proposals[proposalCount] = proposal;
         proposalCount += 1;
@@ -44,9 +64,7 @@ contract Vote {
         owner = newOwner;
     }
 
-    function removeOwnership() public {
-        require(isOver());
-
+    function removeOwnership() private {
         owner = 0x0;
     }
 
@@ -54,12 +72,13 @@ contract Vote {
         return (votes[id]);        
     }
     
-    function returnCurrentVote(uint id) constant public returns (string, uint) {
-        return (proposals[id], votes[id]);        
+    function returnProposal(uint id) constant public returns (bytes32) {
+        return (proposals[id]);        
     }
 
-    function getWinner() constant public returns (string winner) {
+    function getWinner() constant public returns (bytes32 winner) {
         require(isOver());
+        removeOwnership();
 
         uint id;
         uint vote;
@@ -81,7 +100,7 @@ contract Vote {
         return proposalCount;
     }
 
-    function isOver() constant public returns (bool over) {
+    function isOver() constant private returns (bool over) {
         if (startTime + votingTime > now) {
             return true;
         }
@@ -95,15 +114,31 @@ contract VotingSystem {
     mapping (uint => Vote) public votes;
     uint voteCount;
 
-    function newVote(uint votingTime) public returns (uint voteID) {
-        votes[voteCount] = new Vote(now, votingTime);
+    function newVote(uint votingTime, address[] voters, uint[] tokens) public returns (uint voteID) {
+        votes[voteCount] = new Vote(now, votingTime, voters, tokens);
         voteCount += 1;
 
         return voteCount - 1;
     }
 
-    function addProposal(uint voteID, string proposal) public {
+    function voteFor(uint voteID, uint proposalID, uint vote) public {
+        votes[voteID].voteFor(msg.sender, proposalID, vote);
+    }
+
+    function transferVote(uint voteID, address receiver, uint vote) public {
+        votes[voteID].transferVote(msg.sender, receiver, vote);
+    }
+
+    function addProposal(uint voteID, bytes32 proposal) public {
         votes[voteID].addProposal(proposal);
+    }
+
+    function removeProposal(uint voteID, uint proposalID) public {
+        votes[voteID].removeProposal(proposalID);
+    }
+
+    function transferOwnership(uint voteID, address newOwner) public {
+        votes[voteID].transferOwnership(newOwner);
     }
 
     function returnVotes(uint voteID) constant public returns (uint[]) {
@@ -114,6 +149,18 @@ contract VotingSystem {
         }
         return results;
     }
-    
+
+    function returnCurrentVote(uint voteID, uint proposalID) constant public returns (bytes32, uint) {
+        return (votes[voteID].returnProposal(proposalID), votes[voteID].returnVotes(proposalID));
+    }
+
+    function getWinner(uint voteID) constant public returns (bytes32 winner) {
+        return votes[voteID].getWinner();
+    }
+
+    function getProposalCount(uint voteID) constant returns (uint count) {
+        return votes[voteID].getProposalCount();
+    }
+
 
 }
