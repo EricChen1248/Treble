@@ -3,7 +3,7 @@ pragma solidity ^ 0.4.8;
 contract Vote {
     mapping (uint => bytes32) public proposals;
     mapping (uint => uint) votes;
-    mapping (address => uint) usableVotes;
+    mapping (address => uint) public usableVotes;
     
 
     uint public proposalCount;
@@ -22,7 +22,11 @@ contract Vote {
         }
     }
 
+
     function voteFor(address voter,uint proposalID, uint vote) public returns(bool successful) {
+        if (usableVotes[voter] < vote) {
+            return false;
+        }
         require(usableVotes[voter] > vote);
         require(!isOver());
         usableVotes[voter] -= vote;
@@ -41,7 +45,6 @@ contract Vote {
     }
 
     function addProposal(bytes32 proposal) public returns (bool successful) {
-        require (owner == msg.sender);
         proposals[proposalCount] = proposal;
         proposalCount += 1;
 
@@ -49,7 +52,6 @@ contract Vote {
     }
     
     function removeProposal(uint proposalID) public returns (bool successful) {
-        require (owner == msg.sender);
         require (keccak256(proposals[proposalID]) != keccak256(""));
         require (votes[proposalID] == 0);
 
